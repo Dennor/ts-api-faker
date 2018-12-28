@@ -113,6 +113,9 @@ function iterateAllValuesFaker(dict: DictOrArray, key?: string): DictOrArray {
         if (k === "shape") {
           return getRandomShape(f);
         }
+        if (k === "enum") {
+          return f
+        }
         if (k === "image") {
           let imageWidth = x || "200";
           let imageHeight = y || x || "200";
