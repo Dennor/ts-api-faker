@@ -15,10 +15,10 @@ const resolveImages = ({
   width,
   height
 }: {
-    name: string;
-    width: number;
-    height: number;
-  }) => {
+  name: string;
+  width: number;
+  height: number;
+}) => {
   switch (name) {
     case "dataUri":
       return faker.image.dataUri(width, height);
@@ -104,6 +104,9 @@ function iterateAllValuesFaker(dict: DictOrArray, key?: string): DictOrArray {
       }
       if (typeof value === "string") {
         const [k, f, x, y] = value.split(".");
+        if (k === "scalar") {
+          return handleValue(f, key)
+        }
         if (k === "shape") {
           return getRandomShape(f);
         }
