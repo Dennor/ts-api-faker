@@ -8,7 +8,7 @@ type DictOrString = {
   [x: string]: string | DictOrString | DictOrString[];
 };
 
-type DictOrArray = DictOrString | DictOrString[];
+type DictOrArray = DictOrString | DictOrString[] | string;
 
 const resolveImages = ({
   name,
@@ -104,11 +104,20 @@ function iterateAllValuesFaker(dict: DictOrArray, key?: string): DictOrArray {
       }
       if (typeof value === "string") {
         const [k, f, x, y] = value.split(".");
+        // short path, if we have an exact
+        // match for supplied value,
+        // return it
+        if (typeof (faker[k]) !== "undefined" && typeof (faker[k][f]) !== "undefined") {
+          return faker[k][f]();
+        }
         if (k === "scalar") {
           return handleValue(f, key)
         }
         if (k === "shape") {
           return getRandomShape(f);
+        }
+        if (k === "enum") {
+          return f
         }
         if (k === "image") {
           let imageWidth = x || "200";
@@ -127,21 +136,18 @@ function iterateAllValuesFaker(dict: DictOrArray, key?: string): DictOrArray {
           return randomDate();
         }
         const [isImageType] = imageTypes.filter(i =>
-          key.toLowerCase().match(i.toLowerCase())
+          typeof key === "undefined" ? undefined : key.toLowerCase().match(i.toLowerCase())
         );
         if (isImageType) {
           return handleValue("image", key.toLowerCase().replace(isImageType, ""));
         }
-        if (!faker[k]) {
-          if (value === "String" || value === "string") {
-            return handleValue(compare(key, allKeys), key);
+        if (value === "String" || value === "string") {
+          if (typeof key === "undefined") {
+            return faker.lorem.word()
           }
-          return value;
+          return handleValue(compare(key, allKeys), key);
         }
-        if (!faker[k][f]) {
-          return value;
-        }
-        return faker[k][f]();
+        return value
       } else {
         return iterateAllValuesFaker(value);
       }
@@ -149,6 +155,9 @@ function iterateAllValuesFaker(dict: DictOrArray, key?: string): DictOrArray {
       return `<<field could not be faked, reason: ${e.message}>>`
     }
   };
+  if (typeof dict === "string") {
+    return handleValue(dict, key)
+  }
   if (Array.isArray(dict)) {
     return dict.map(d => handleValue(d, key)) as DictOrArray;
   }
