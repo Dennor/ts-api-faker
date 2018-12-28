@@ -42,6 +42,13 @@ function randomDate(): string {
   const helper = new Date(2012, 0, 1);
   return new Date(
     helper.getTime() + Math.random() * (now.getTime() - helper.getTime())
+  ).toDateString();
+}
+function randomDateTime(): string {
+  const now = new Date();
+  const helper = new Date(2012, 0, 1);
+  return new Date(
+    helper.getTime() + Math.random() * (now.getTime() - helper.getTime())
   ).toISOString();
 }
 const imageTypes = ["image", "picture", "photo"];
@@ -132,8 +139,11 @@ function iterateAllValuesFaker(dict: DictOrArray, key?: string): DictOrArray {
         if (k === "gender") {
           return randomGender();
         }
-        if (k === "date") {
+        if (k.toLowerCase() === "date") {
           return randomDate();
+        }
+        if (k.toLocaleLowerCase() === "datetime") {
+          return randomDateTime();
         }
         const [isImageType] = imageTypes.filter(i =>
           typeof key === "undefined" ? undefined : key.toLowerCase().match(i.toLowerCase())
